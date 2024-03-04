@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, status, Depends, Header, Path
 from typing import Optional, Any, List
 from modelo import Site
 from time import sleep
+from fastapi.encoders import jsonable_encoder
+
 
 def fake_db():
   try:
@@ -166,6 +168,24 @@ async def delete_site(site_id: int):
       return
     else:
       raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Não existe um site com esse id')
+    
+#método patch(atualizar apenas pelo id, e apenas um elemento por vez)
+@app.patch("/site/{site_id}", response_model=Site)
+async def update_item(site_id: int, item: Site):
+  
+    if site_id in sites:
+      
+        stored_item_data = sites[site_id]
+        stored_item_model = Site(**stored_item_data)
+        update_data = item.dict(exclude_unset=True)
+        updated_item = stored_item_model.copy(update=update_data)
+        sites[site_id] = jsonable_encoder(updated_item)
+        return updated_item
+    
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Não existe um site com esse id')
+    
+
   
       
 if __name__ == "__main__":
