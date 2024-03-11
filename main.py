@@ -124,12 +124,13 @@ sites = {
 #método get(visualizar)
 @app.get("/")
 async def raiz():
-    return {'mensagem': 'API encontrada'}
+    return {'detail': 'API encontrada'}
 
 @app.get('/site')
 async def get_sites(db: Any = Depends(fake_db)):
     return sites
 
+#get por id
 @app.get('/site/{site_id}')
 async def get_site(site_id: int = Path(..., title='Método para buscar o site pelo id', gt=0, lt=30, description='Selecionar site por id, onde o id deve estar entre 0 e 20')):
     if site_id not in sites:
@@ -141,10 +142,9 @@ async def get_site(site_id: int = Path(..., title='Método para buscar o site pe
 #método post(criar)
 @app.post('/site', status_code=status.HTTP_201_CREATED)
 async def post_site(site: Optional[Site] = None):
-    if site.id not in site:
+    if site.id not in site: #verifica se não existe
       next_id = len(sites) + 1
       sites[next_id] = site
-      del site.id
       return site
     else:
       raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Esse site já existe')
@@ -165,29 +165,24 @@ async def put_site(site_id: int, site: Site):
 async def delete_site(site_id: int):
     if site_id in sites:
       del sites[site_id]
-      return
+      return {'detail': 'apagado com sucesso'}
     else:
       raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Não existe um site com esse id')
     
 #método patch(atualizar apenas pelo id, e apenas um elemento por vez)
-@app.patch("/site/{site_id}", response_model=Site)
-async def update_item(site_id: int, item: Site):
-  
+@app.patch('/site/{site_id}', response_model=Site)
+async def update_site(site_id: int, item: Site):
     if site_id in sites:
-      
         stored_item_data = sites[site_id]
         stored_item_model = Site(**stored_item_data)
-        update_data = item.dict(exclude_unset=True)
-        updated_item = stored_item_model.copy(update=update_data)
+        update_data = item.model_dump(exclude_unset=True)
+        updated_item = stored_item_model.model_copy(update=update_data)
         sites[site_id] = jsonable_encoder(updated_item)
         return updated_item
-    
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Não existe um site com esse id')
-    
-
-  
       
+       
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run('main:app', host="127.0.0.1", port=8000, log_level="info", reload=True)
+    uvicorn.run('main:app', host="10.234.83.58", port=8000, log_level="info", reload=True)
