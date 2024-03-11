@@ -1,0 +1,8 @@
+Passo a Passo de como subir API na rede local
+1 - abrir IT Workplace Toolkit (Icone de ferramenta)
+2- ativar Compartilhamento de pasta
+3- abrir o start cntlm e ativar ou desativas sla
+4- abrir o cmd e digitar ipconfig
+5- copiar o ipv4
+6- colar o ipv4 no host da aplicação, na parte do run
+7- colocar o ip no navegador e adicionar :8000
